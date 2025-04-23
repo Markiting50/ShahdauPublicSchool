@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Result Card Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Custom styles for better PDF rendering and appearance */
+        body {
+            font-family: 'Inter', sans-serif; /* Using Inter font as requested */
+        }
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact; /* Ensure colors print correctly */
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none; /* Hide elements not needed for print/PDF */
+            }
+            #resultCard {
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+        /* Add some basic styling for input focus */
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid #3b82f6; /* Blue outline on focus */
+            outline-offset: 1px;
+        }
+        /* Style for the result card container */
+        #resultCard {
+            border: 1px solid #e5e7eb; /* Light gray border */
+            border-radius: 0.5rem; /* Rounded corners */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* Soft shadow */
+            overflow: hidden; /* Ensure content fits within rounded corners */
+        }
+         /* Style placeholder text */
+        ::placeholder {
+            color: #9ca3af; /* Gray-400 */
+            opacity: 1; /* Firefox */
+        }
+        /* Ensure radio buttons and labels are aligned */
+        .radio-label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+        .radio-input {
+            margin-right: 0.3rem;
+        }
+        /* Style for the add/remove buttons */
+        .action-button {
+             background-color: #3b82f6; /* Blue-500 */
+             color: white;
+             padding: 0.5rem 1rem;
+             border-radius: 0.375rem; /* Rounded-md */
+             font-weight: 500;
+             transition: background-color 0.2s;
+             cursor: pointer;
+        }
+        .action-button:hover {
+            background-color: #2563eb; /* Blue-600 */
+        }
+        .remove-button {
+            background-color: #ef4444; /* Red-500 */
+        }
+        .remove-button:hover {
+            background-color: #dc2626; /* Red-600 */
+        }
+        /* Style for the final download button */
+        #downloadPdfBtn {
+             background-color: #10b981; /* Emerald-500 */
+             color: white;
+             padding: 0.75rem 1.5rem;
+             border-radius: 0.375rem; /* Rounded-md */
+             font-weight: 600;
+             transition: background-color 0.2s;
+             cursor: pointer;
+             margin-top: 1.5rem;
+        }
+         #downloadPdfBtn:hover {
+             background-color: #059669; /* Emerald-600 */
+         }
+         /* Center the form container */
+         .form-container {
+             max-width: 900px; /* Adjust max-width as needed */
+             margin-left: auto;
+             margin-right: auto;
+         }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="form-container bg-white p-6 md:p-10 rounded-lg shadow-lg">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-6">School Result Card Generator</h1>
+
+        <div id="resultCard" class="bg-white p-6 md:p-8">
+            <div class="header-section border-b pb-4 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                    <div class="flex items-center gap-3">
+                         <img id="schoolLogoPreview" src="https://placehold.co/80x80/e2e8f0/334155?text=Logo" alt="School Logo" class="h-16 w-16 md:h-20 md:w-20 object-contain rounded-md border">
+                         <input type="file" id="schoolLogo" accept="image/*" class="text-sm no-print">
+                    </div>
+                    <div class="text-center sm:text-right">
+                        <input type="text" id="schoolName" placeholder="Enter School Name" class="text-xl md:text-2xl font-bold text-gray-700 border-b-2 border-gray-300 focus:border-blue-500 outline-none p-1 w-full sm:w-auto text-center sm:text-right mb-1 rounded">
+                        <input type="text" id="academicYear" placeholder="Academic Year (e.g., 2024-2025)" class="text-sm text-gray-500 border-b border-gray-300 focus:border-blue-500 outline-none p-1 w-full sm:w-auto text-center sm:text-right rounded">
+                    </div>
+                </div>
+                 <div class="text-center sm:text-right">
+                     <input type="text" id="classGrade" placeholder="Class / Grade" class="text-lg font-semibold text-gray-600 border-b border-gray-300 focus:border-blue-500 outline-none p-1 w-full sm:w-auto text-center sm:text-right rounded">
+                </div>
+            </div>
+
+            <div class="student-info-section mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                 <div>
+                    <label for="studentName" class="block text-sm font-medium text-gray-700 mb-1">Student Name:</label>
+                    <input type="text" id="studentName" placeholder="Full Name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                 <div>
+                    <label for="fatherName" class="block text-sm font-medium text-gray-700 mb-1">Father's Name:</label>
+                    <input type="text" id="fatherName" placeholder="Father's Full Name" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                 <div>
+                    <label for="rollNumber" class="block text-sm font-medium text-gray-700 mb-1">Roll Number:</label>
+                    <input type="text" id="rollNumber" placeholder="Roll No." class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                 <div>
+                    <label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth:</label>
+                    <input type="date" id="dob" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-500">
+                </div>
+                 <div>
+                    <label for="admissionNumber" class="block text-sm font-medium text-gray-700 mb-1">Admission Number:</label>
+                    <input type="text" id="admissionNumber" placeholder="Admission No." class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="subjects-section mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3 border-b pb-2">Subjects & Marks</h3>
+                <div id="subjectsContainer" class="space-y-4">
+                    </div>
+                <button id="addSubjectBtn" type="button" class="mt-4 action-button no-print">
+                    + Add Subject
+                </button>
+            </div>
+
+            <div class="additional-info-section mb-6 border-t pt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Total Marks Obtained:</label>
+                    <p id="totalMarksObtained" class="mt-1 text-lg font-semibold text-gray-900">0</p>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">Overall Total Marks:</label>
+                    <p id="overallTotalMarks" class="mt-1 text-lg font-semibold text-gray-900">0</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Percentage:</label>
+                    <p id="percentage" class="mt-1 text-lg font-semibold text-gray-900">0.00%</p>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700">Grade:</label>
+                    <p id="grade" class="mt-1 text-lg font-semibold text-gray-900">-</p>
+                </div>
+                 <div class="sm:col-span-2 md:col-span-4">
+                    <label class="block text-sm font-medium text-gray-700">Result:</label>
+                    <p id="result" class="mt-1 text-lg font-bold text-gray-900">-</p>
+                 </div>
+            </div>
+
+            <div class="signature-section mt-8 pt-6 border-t border-dashed">
+                 <div class="flex flex-col sm:flex-row justify-between items-center gap-8 text-center sm:text-left">
+                     <div class="w-full sm:w-auto">
+                         <div class="border-t-2 border-gray-400 pt-1 mt-8 w-48 mx-auto sm:mx-0"></div>
+                         <p class="text-sm font-medium text-gray-700 mt-1">Teacher's Signature</p>
+                     </div>
+                     <div class="w-full sm:w-auto">
+                         <div class="border-t-2 border-gray-400 pt-1 mt-8 w-48 mx-auto sm:mx-0"></div>
+                         <p class="text-sm font-medium text-gray-700 mt-1">Principal's Signature</p>
+                     </div>
+                 </div>
+            </div>
+        </div> <div class="text-center mt-6 no-print">
+            <button id="downloadPdfBtn" type="button">
+                Download as PDF
+            </button>
+        </div>
+         <div id="messageBox" class="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg hidden transition-opacity duration-300 no-print">
+            <span id="messageText"></span>
+            <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="ml-4 font-bold">X</button>
+        </div>
+
+    </div> <script>
+        // --- Configuration ---
+        const PASS_PERCENTAGE = 40; // Minimum percentage to pass
+        const SUBJECT_OPTIONS = [ // Predefined list of subjects
+            "English", "Mathematics", "Science", "Social Studies", "Computer Science",
+            "Physics", "Chemistry", "Biology", "History", "Geography",
+            "Art", "Music", "Physical Education", "Urdu", "Islamiat" // Added regional subjects
+        ];
+
+        // --- DOM Elements ---
+        const subjectsContainer = document.getElementById('subjectsContainer');
+        const addSubjectBtn = document.getElementById('addSubjectBtn');
+        const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+        const resultCardElement = document.getElementById('resultCard');
+        const totalMarksObtainedEl = document.getElementById('totalMarksObtained');
+        const overallTotalMarksEl = document.getElementById('overallTotalMarks');
+        const percentageEl = document.getElementById('percentage');
+        const gradeEl = document.getElementById('grade');
+        const resultEl = document.getElementById('result');
+        const schoolLogoInput = document.getElementById('schoolLogo');
+        const schoolLogoPreview = document.getElementById('schoolLogoPreview');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+
+        let subjectCounter = 0; // To give unique IDs to each subject row
+
+        // --- Functions ---
+
+        // Function to show messages to the user
+        function showMessage(message, isError = true) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-500', 'bg-green-500');
+            messageBox.classList.add(isError ? 'bg-red-500' : 'bg-green-500');
+            messageBox.style.opacity = '1'; // Make it visible
+
+            // Hide the message box after 5 seconds
+            setTimeout(() => {
+                 messageBox.style.opacity = '0';
+                 setTimeout(() => messageBox.classList.add('hidden'), 300); // Hide after fade out
+            }, 5000);
+        }
+
+        // Function to add a new subject row
+        function addSubjectRow() {
+            subjectCounter++;
+            const subjectId = `subject-${subjectCounter}`;
+
+            const row = document.createElement('div');
+            row.classList.add('subject-row', 'p-3', 'border', 'rounded-md', 'bg-gray-50', 'grid', 'grid-cols-1', 'sm:grid-cols-4', 'gap-3', 'items-center');
+            row.id = subjectId;
+
+            // Subject Name Dropdown
+            const subjectSelectDiv = document.createElement('div');
+            subjectSelectDiv.innerHTML = `
+                <label for="${subjectId}-name" class="text-sm font-medium text-gray-600 mb-1 block">Subject:</label>
+                <select id="${subjectId}-name" name="${subjectId}-name" class="subject-name w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">-- Select Subject --</option>
+                    ${SUBJECT_OPTIONS.map(sub => `<option value="${sub}">${sub}</option>`).join('')}
+                     <option value="Other">Other (Specify)</option>
+                </select>
+                <input type="text" id="${subjectId}-other" name="${subjectId}-other" placeholder="Specify Subject" class="other-subject-input w-full p-2 border border-gray-300 rounded-md shadow-sm mt-1 hidden">
+            `;
+
+            // Total Marks Radio Buttons
+            const totalMarksDiv = document.createElement('div');
+            totalMarksDiv.innerHTML = `
+                <label class="text-sm font-medium text-gray-600 mb-1 block">Total Marks:</label>
+                <div>
+                    <label class="radio-label">
+                        <input type="radio" name="${subjectId}-total" value="100" class="total-marks radio-input" checked> 100
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="${subjectId}-total" value="150" class="total-marks radio-input"> 150
+                    </label>
+                </div>
+            `;
+
+            // Marks Obtained Input
+            const marksObtainedDiv = document.createElement('div');
+            marksObtainedDiv.innerHTML = `
+                <label for="${subjectId}-obtained" class="text-sm font-medium text-gray-600 mb-1 block">Marks Obtained:</label>
+                <input type="number" id="${subjectId}-obtained" name="${subjectId}-obtained" placeholder="Obtained" min="0" class="marks-obtained w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            `;
+
+            // Remove Button
+            const removeButtonDiv = document.createElement('div');
+            removeButtonDiv.classList.add('text-right', 'sm:text-center', 'mt-2', 'sm:mt-0'); // Center button vertically on larger screens
+            const removeButton = document.createElement('button');
+            removeButton.textContent = 'Remove';
+            removeButton.type = 'button';
+            removeButton.classList.add('remove-button', 'action-button', 'text-sm', 'no-print');
+            removeButton.onclick = () => {
+                subjectsContainer.removeChild(row);
+                calculateResults(); // Recalculate after removing
+            };
+            removeButtonDiv.appendChild(removeButton);
+
+            row.appendChild(subjectSelectDiv);
+            row.appendChild(totalMarksDiv);
+            row.appendChild(marksObtainedDiv);
+            row.appendChild(removeButtonDiv);
+
+            subjectsContainer.appendChild(row);
+
+            // Add event listener for the new subject dropdown to handle "Other"
+             const subjectSelect = row.querySelector('.subject-name');
+             const otherInput = row.querySelector('.other-subject-input');
+             subjectSelect.addEventListener('change', (event) => {
+                 if (event.target.value === 'Other') {
+                     otherInput.classList.remove('hidden');
+                     otherInput.required = true; // Make it required if Other is selected
+                 } else {
+                     otherInput.classList.add('hidden');
+                     otherInput.required = false;
+                     otherInput.value = ''; // Clear if another option is chosen
+                 }
+                 calculateResults(); // Recalculate if needed
+             });
+
+             // Add event listeners for input changes to recalculate results
+             row.querySelectorAll('input, select').forEach(input => {
+                 input.addEventListener('input', calculateResults);
+                 input.addEventListener('change', calculateResults); // For radio/select
+             });
+        }
+
+        // Function to calculate Grade based on percentage
+        function calculateGrade(percentage) {
+            if (isNaN(percentage)) return '-';
+            if (percentage >= 90) return 'A+';
+            if (percentage >= 80) return 'A';
+            if (percentage >= 70) return 'B';
+            if (percentage >= 60) return 'C';
+            if (percentage >= 50) return 'D';
+            if (percentage >= PASS_PERCENTAGE) return 'E';
+            return 'F'; // Fail
+        }
+
+        // Function to calculate and display results
+        function calculateResults() {
+            let totalObtained = 0;
+            let overallTotal = 0;
+            let allInputsValid = true;
+            let subjectsEntered = false; // Flag to check if any subject marks are entered
+
+            subjectsContainer.querySelectorAll('.subject-row').forEach(row => {
+                subjectsEntered = true; // Mark that we have at least one subject row
+                const totalMarksInput = row.querySelector('input[name$="-total"]:checked');
+                const marksObtainedInput = row.querySelector('.marks-obtained');
+                const subjectSelect = row.querySelector('.subject-name');
+                const otherSubjectInput = row.querySelector('.other-subject-input');
+
+                // Basic validation: Check if subject is selected/entered
+                const subjectName = subjectSelect.value === 'Other' ? otherSubjectInput.value.trim() : subjectSelect.value;
+                if (!subjectName) {
+                    allInputsValid = false;
+                    // Optionally add visual feedback here (e.g., border color)
+                }
+
+                const totalMarks = totalMarksInput ? parseInt(totalMarksInput.value, 10) : 0;
+                const obtainedMarks = marksObtainedInput.value ? parseInt(marksObtainedInput.value, 10) : NaN; // Use NaN if empty
+
+                if (!isNaN(obtainedMarks) && obtainedMarks >= 0 && obtainedMarks <= totalMarks) {
+                    totalObtained += obtainedMarks;
+                    overallTotal += totalMarks;
+                    marksObtainedInput.classList.remove('border-red-500'); // Remove error state
+                } else if (marksObtainedInput.value !== '') { // Only invalidate if there's an invalid *entry*
+                    allInputsValid = false;
+                    marksObtainedInput.classList.add('border-red-500'); // Add error state
+                } else {
+                     // Treat empty obtained marks as incomplete, but don't mark as fail yet unless required
+                     // If you want empty fields to prevent calculation, set allInputsValid = false here.
+                }
+            });
+
+            totalMarksObtainedEl.textContent = totalObtained;
+            overallTotalMarksEl.textContent = overallTotal;
+
+            let percentage = 0;
+            let grade = '-';
+            let finalResult = '-';
+
+            if (overallTotal > 0 && allInputsValid && subjectsEntered) {
+                percentage = (totalObtained / overallTotal) * 100;
+                grade = calculateGrade(percentage);
+                finalResult = percentage >= PASS_PERCENTAGE ? 'Pass' : 'Fail';
+
+                percentageEl.textContent = percentage.toFixed(2) + '%';
+                gradeEl.textContent = grade;
+                resultEl.textContent = finalResult;
+                resultEl.classList.remove('text-green-600', 'text-red-600');
+                resultEl.classList.add(finalResult === 'Pass' ? 'text-green-600' : 'text-red-600');
+
+            } else if (subjectsEntered) { // If subjects are added but data is invalid/incomplete
+                 percentageEl.textContent = 'N/A';
+                 gradeEl.textContent = '-';
+                 resultEl.textContent = 'Incomplete Data';
+                 resultEl.classList.remove('text-green-600', 'text-red-600');
+            } else { // No subjects added yet
+                 percentageEl.textContent = '0.00%';
+                 gradeEl.textContent = '-';
+                 resultEl.textContent = '-';
+                 resultEl.classList.remove('text-green-600', 'text-red-600');
+            }
+        }
+
+        // Function to handle PDF download
+        async function downloadPdf() {
+            // 1. Check for required fields before generating PDF
+            const requiredFields = [
+                { id: 'schoolName', name: 'School Name' },
+                { id: 'academicYear', name: 'Academic Year' },
+                { id: 'classGrade', name: 'Class / Grade' },
+                { id: 'studentName', name: 'Student Name' },
+                { id: 'fatherName', name: "Father's Name" },
+                { id: 'rollNumber', name: 'Roll Number' },
+                { id: 'dob', name: 'Date of Birth' },
+                { id: 'admissionNumber', name: 'Admission Number' }
+            ];
+            let missingFields = [];
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element || !element.value.trim()) {
+                    missingFields.push(field.name);
+                    if (element) element.classList.add('border-red-500'); // Highlight missing field
+                } else if (element) {
+                    element.classList.remove('border-red-500'); // Remove highlight if filled
+                }
+            });
+
+             // Check subject details (at least one subject row must be valid)
+             let validSubjectsExist = false;
+             let subjectFieldsMissing = false;
+             if (subjectsContainer.querySelectorAll('.subject-row').length === 0) {
+                 missingFields.push("at least one Subject");
+             } else {
+                 subjectsContainer.querySelectorAll('.subject-row').forEach(row => {
+                     const subjectSelect = row.querySelector('.subject-name');
+                     const otherSubjectInput = row.querySelector('.other-subject-input');
+                     const marksObtainedInput = row.querySelector('.marks-obtained');
+                     const totalMarksInput = row.querySelector('input[name$="-total"]:checked');
+
+                     const subjectName = subjectSelect.value === 'Other' ? otherSubjectInput.value.trim() : subjectSelect.value;
+                     const obtainedMarks = marksObtainedInput.value;
+
+                     if (!subjectName || obtainedMarks === '' || !totalMarksInput) {
+                         subjectFieldsMissing = true;
+                         // Highlight missing parts within the row
+                         if (!subjectName) {
+                            subjectSelect.classList.add('border-red-500');
+                            if (subjectSelect.value === 'Other') otherSubjectInput.classList.add('border-red-500');
+                         } else {
+                             subjectSelect.classList.remove('border-red-500');
+                             if (subjectSelect.value === 'Other') otherSubjectInput.classList.remove('border-red-500');
+                         }
+                         if (obtainedMarks === '') marksObtainedInput.classList.add('border-red-500');
+                         else marksObtainedInput.classList.remove('border-red-500');
+                     } else {
+                         // Clear highlights if valid
+                         subjectSelect.classList.remove('border-red-500');
+                         otherSubjectInput.classList.remove('border-red-500');
+                         marksObtainedInput.classList.remove('border-red-500');
+                         validSubjectsExist = true; // Mark that at least one row seems complete
+                     }
+                 });
+                 if(subjectFieldsMissing && !validSubjectsExist) { // If all rows have issues
+                     missingFields.push("complete Subject details (Name, Total Marks, Obtained Marks)");
+                 } else if (subjectFieldsMissing) {
+                     // Allow download but maybe warn? For now, proceed if at least one row is okay.
+                     console.warn("Some subject rows have incomplete data.");
+                 }
+             }
+
+
+            if (missingFields.length > 0) {
+                showMessage(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+                return; // Stop PDF generation
+            }
+
+            // 2. Temporarily hide non-PDF elements
+            document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+            downloadPdfBtn.textContent = 'Generating PDF...'; // Provide feedback
+            downloadPdfBtn.disabled = true;
+
+            // 3. Use html2canvas to capture the element
+            try {
+                const canvas = await html2canvas(resultCardElement, {
+                     scale: 2, // Increase scale for better resolution
+                     useCORS: true, // If using external images (like logo placeholder)
+                     logging: false // Disable console logging from html2canvas
+                 });
+
+                const imgData = canvas.toDataURL('image/png');
+
+                // 4. Use jsPDF to create PDF
+                const { jsPDF } = window.jspdf;
+                // Calculate PDF dimensions based on canvas aspect ratio (A4 size: 210 x 297 mm)
+                const pdfWidth = 210;
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const aspectRatio = imgHeight / imgWidth;
+                const pdfHeight = pdfWidth * aspectRatio;
+
+                // Use 'p' for portrait, 'mm' for millimeters, 'a4' for standard size (will crop if content too tall)
+                // Or use custom dimensions based on content: [pdfWidth, pdfHeight]
+                const pdf = new jsPDF({
+                    orientation: pdfWidth > pdfHeight ? 'l' : 'p', // landscape if wider
+                    unit: 'mm',
+                    format: [pdfWidth, pdfHeight] // Use calculated dimensions
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+                // 5. Trigger download
+                const studentName = document.getElementById('studentName').value || 'student';
+                const rollNumber = document.getElementById('rollNumber').value || 'result';
+                pdf.save(`ResultCard_${studentName.replace(/ /g, '_')}_${rollNumber}.pdf`);
+                showMessage('PDF downloaded successfully!', false); // Success message
+
+            } catch (error) {
+                console.error("Error generating PDF:", error);
+                 showMessage('Error generating PDF. See console for details.');
+            } finally {
+                // 6. Restore hidden elements and button state
+                document.querySelectorAll('.no-print').forEach(el => el.style.display = ''); // Restore display
+                downloadPdfBtn.textContent = 'Download as PDF';
+                downloadPdfBtn.disabled = false;
+            }
+        }
+
+         // Function to handle logo upload preview
+         function handleLogoUpload(event) {
+             const file = event.target.files[0];
+             if (file && file.type.startsWith('image/')) {
+                 const reader = new FileReader();
+                 reader.onload = function(e) {
+                     schoolLogoPreview.src = e.target.result;
+                     schoolLogoPreview.onerror = () => { // Add fallback if the loaded image fails
+                         schoolLogoPreview.src = 'https://placehold.co/80x80/e2e8f0/334155?text=Error';
+                     };
+                 }
+                 reader.readAsDataURL(file);
+             } else if (file) {
+                 showMessage('Please select a valid image file (PNG, JPG, GIF, etc.).');
+                 event.target.value = ''; // Clear the invalid file selection
+                 schoolLogoPreview.src = 'https://placehold.co/80x80/e2e8f0/334155?text=Logo'; // Reset to placeholder
+             }
+         }
+
+        // --- Event Listeners ---
+        addSubjectBtn.addEventListener('click', addSubjectRow);
+        downloadPdfBtn.addEventListener('click', downloadPdf);
+        schoolLogoInput.addEventListener('change', handleLogoUpload);
+
+        // Add initial subject row(s) - uncomment if you want rows by default
+        // addSubjectRow();
+        // addSubjectRow();
+
+        // Initial calculation in case there are default values or pre-filled data
+        calculateResults();
+
+        // Add listeners to general info inputs for validation feedback removal
+        document.querySelectorAll('#schoolName, #academicYear, #classGrade, #studentName, #fatherName, #rollNumber, #dob, #admissionNumber').forEach(input => {
+            input.addEventListener('input', () => {
+                if (input.value.trim()) {
+                    input.classList.remove('border-red-500');
+                }
+            });
+        });
+
+    </script>
+
+</body>
+</html>
